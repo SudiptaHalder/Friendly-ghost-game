@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👻 FRIENDLY GHOST · catch the fun</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #a8d8ff, #e0f0ff);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Inter', cursive, sans-serif;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 100, 200, 0.2), 0 0 0 3px white;
+            border: 2px solid #ffdab9;
+            max-width: 800px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 15px;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #5a3e2b;
+            text-shadow: 3px 3px 0 #ffb57c;
+            background: #fff9e6;
+            padding: 10px 25px;
+            border-radius: 60px;
+            display: inline-block;
+            box-shadow: 0 5px 0 #ffb27f;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            background: white;
+            padding: 10px 25px;
+            border-radius: 40px;
+            box-shadow: 0 5px 0 #ffb27f;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #5a3e2b;
+        }
+
+        .instruction {
+            background: #fff9e6;
+            padding: 15px 25px;
+            border-radius: 40px;
+            margin: 15px 0 20px 0;
+            font-size: 20px;
+            color: #5a3e2b;
+            border: 3px dashed #ffaa77;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .instruction kbd {
+            background: #ffdbb5;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            border: 2px solid #ff9f66;
+            box-shadow: 0 3px 0 #ff9f66;
+        }
+
+        .canvas-wrapper {
+            border-radius: 40px;
+            overflow: hidden;
+            border: 5px solid white;
+            box-shadow: 0 10px 0 #ffb27f;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: linear-gradient(180deg, #b2d9ff, #deecff);
+            cursor: pointer;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #fff9e6;
+            border-radius: 40px;
+            font-size: 18px;
+            color: #5a3e2b;
+            border: 2px solid #ffc9a2;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff9e6;
+            padding: 40px;
+            border-radius: 80px;
+            text-align: center;
+            border: 5px solid white;
+            box-shadow: 0 20px 0 #ff9f66;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .game-over-content {
+            background: #ffe6e6;
+            border: 5px solid #ffb5b5;
+            box-shadow: 0 20px 0 #ff8585;
+        }
+
+        .modal h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #5a3e2b;
+        }
+
+        .game-over h2 {
+            color: #b30000;
+        }
+
+        .modal button {
+            background: #ffb57c;
+            border: none;
+            padding: 15px 40px;
+            font-size: 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            color: white;
+            border: 3px solid white;
+            box-shadow: 0 7px 0 #ff8033;
+            cursor: pointer;
+            margin: 15px;
+            transition: 0.1s;
+        }
+
+        .modal button:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #ff8033;
+        }
+
+        .modal button.restart-btn {
+            background: #4CAF50;
+            box-shadow: 0 7px 0 #2d6a2d;
+        }
+
+        /* Wheel styles */
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ffd966 0deg 60deg,
+                #ffb3ba 60deg 120deg,
+                #bae1ff 120deg 180deg,
+                #c4e9b0 180deg 240deg,
+                #f9c9b7 240deg 300deg,
+                #d5aaff 300deg 360deg
+            );
+            border: 8px solid white;
+            box-shadow: 0 10px 0 #ff9f66;
+            transition: transform 3s cubic-bezier(0.3, 0.8, 0.3, 1);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 50px solid #ff5757;
+            filter: drop-shadow(0 5px 0 #a13333);
+        }
+
+        .prize-display {
+            font-size: 32px;
+            margin: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 50px;
+            border: 3px solid #ffaa77;
+            min-height: 90px;
+        }
+
+        .spin-btn {
+            font-size: 32px !important;
+            padding: 20px 50px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="title">👻 FRIENDLY GHOSTS</div>
+            <div class="stats">
+                <div class="stat"><span>📊</span><span id="levelDisplay">1</span></div>
+                <div class="stat"><span>❤️</span><span id="lifeDisplay">5</span></div>
+                <div class="stat"><span>⭐</span><span id="scoreDisplay">0</span></div>
+            </div>
+        </div>
+
+        <div class="instruction">
+            <kbd>👆 HOLD to move right</kbd>
+            <span>✨ reach the magic star ✨</span>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="700" height="360"></canvas>
+        </div>
+
+        <div class="footer">
+            <span>⚡ friendly ghosts just bounce around</span>
+            <span>🎯 don't touch them!</span>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content game-over-content">
+            <h2>😢 GAME OVER</h2>
+            <p style="font-size: 24px; margin: 20px;">the ghosts caught you!</p>
+            <button onclick="restartGame()">play again →</button>
+        </div>
+    </div>
+
+    <!-- Win Wheel Modal -->
+    <div id="winWheelModal" class="modal">
+        <div class="modal-content" style="background: #fff0d4;">
+            <h2>🎉 YOU WIN!</h2>
+            <p style="font-size: 22px; margin: 10px;">spin the wheel for a prize!</p>
+            
+            <div class="wheel-container">
+                <div id="wheel" class="wheel"></div>
+                <div class="wheel-pointer"></div>
+            </div>
+            
+            <div id="prizeDisplay" class="prize-display">✨ spin to win ✨</div>
+            
+            <div id="wheelButtons">
+                <button id="spinButton" class="spin-btn" onclick="spinWheel()">🎡 SPIN!</button>
+            </div>
+            <div id="restartButtons" style="display: none;">
+                <button onclick="restartGame()" class="restart-btn" style="background: #4CAF50; box-shadow: 0 7px 0 #2d6a2d;">🔄 PLAY AGAIN</button>
+                <button onclick="continueGame()" style="background: #aaffaa; box-shadow: 0 7px 0 #66cc66;">➡️ CONTINUE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = 700, H = 360;
+
+        // Game state
+        let level = 1;
+        let life = 5;
+        let score = 0;
+        let gameActive = true;
+
+        // Player - improved character
+        const player = {
+            x: 30,
+            y: 160,
+            width: 35,
+            height: 45,
+            speed: 2.5,
+            isMoving: false,
+            color: '#ff9933',
+            headColor: '#ffdd99',
+            hairColor: '#8b4513'
+        };
+
+        // Goal - magic star (improved)
+        const star = {
+            x: 620,
+            y: 150,
+            width: 50,
+            height: 50,
+            rotation: 0,
+            pulse: 0
+        };
+
+        // Friendly ghosts - improved with more details
+        let enemies = [
+            { type: 'happy', x: 120, y: 50, speedY: 1.5, width: 45, height: 50, face: '😊', color: '#ffffff', blush: '#ffc0cb' },
+            { type: 'wink', x: 220, y: 200, speedY: 2, width: 47, height: 47, face: '😉', color: '#f0f0ff', blush: '#ffb6c1' },
+            { type: 'love', x: 340, y: 100, speedY: 2.2, width: 43, height: 53, face: '😍', color: '#fff5f5', blush: '#ff9eb5' },
+            { type: 'cool', x: 460, y: 280, speedY: -1.8, width: 45, height: 45, face: '😎', color: '#f5f5ff', blush: '#ffa5b0' },
+            { type: 'sleepy', x: 540, y: 30, speedY: 1.6, width: 41, height: 51, face: '😴', color: '#e6e6ff', blush: '#ffb3ba' }
+        ];
+
+        // UI elements
+        const levelDisplay = document.getElementById('levelDisplay');
+        const lifeDisplay = document.getElementById('lifeDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const winWheelModal = document.getElementById('winWheelModal');
+        const wheel = document.getElementById('wheel');
+        const prizeDisplay = document.getElementById('prizeDisplay');
+        const spinButton = document.getElementById('spinButton');
+        const wheelButtons = document.getElementById('wheelButtons');
+        const restartButtons = document.getElementById('restartButtons');
+
+        // Wheel prizes
+        const prizes = ['🌟 EXTRA LIFE', '⚡ SPEED BOOST', '❤️ +2 HEARTS', '🎮 BONUS LEVEL', '⭐ DOUBLE SCORE', '🛡️ SHIELD'];
+        let spinning = false;
+        let spinCompleted = false;
+
+        function updateUI() {
+            levelDisplay.textContent = level;
+            lifeDisplay.textContent = life;
+            scoreDisplay.textContent = score;
+        }
+
+        function collides(r1, r2) {
+            return !(r2.x >= r1.x + r1.width || 
+                    r2.x + r2.width <= r1.x || 
+                    r2.y >= r1.y + r1.height || 
+                    r2.y + r2.height <= r1.y);
+        }
+
+        // Draw everything - improved characters!
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            
+            // Sunny sky background
+            const gradient = ctx.createLinearGradient(0, 0, 0, H);
+            gradient.addColorStop(0, '#c1e0ff');
+            gradient.addColorStop(0.7, '#ffeec1');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, W, H);
+            
+            // Fluffy clouds
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.beginPath();
+            ctx.arc(100, 50, 35, 0, Math.PI*2);
+            ctx.arc(150, 70, 30, 0, Math.PI*2);
+            ctx.arc(80, 80, 30, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(500, 100, 40, 0, Math.PI*2);
+            ctx.arc(550, 120, 35, 0, Math.PI*2);
+            ctx.arc(470, 130, 30, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Grass with details
+            ctx.fillStyle = '#a0e68f';
+            ctx.fillRect(0, H-30, W, 30);
+            
+            // Grass blades
+            ctx.strokeStyle = '#5f9f4f';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 20; i++) {
+                let x = i * 35;
+                ctx.beginPath();
+                ctx.moveTo(x, H-30);
+                ctx.lineTo(x-5, H-40);
+                ctx.lineTo(x+5, H-45);
+                ctx.lineTo(x, H-30);
+                ctx.strokeStyle = '#6faf5f';
+                ctx.stroke();
+            }
+            
+            // Flower decorations
+            for (let i = 0; i < 5; i++) {
+                let x = 50 + i * 120;
+                // Stem
+                ctx.strokeStyle = '#5f9f4f';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x, H-30);
+                ctx.lineTo(x, H-50);
+                ctx.stroke();
+                
+                // Flower
+                ctx.fillStyle = '#ffb7c5';
+                ctx.beginPath();
+                ctx.arc(x, H-55, 10, 0, Math.PI*2);
+                ctx.fill();
+                
+                // Center
+                ctx.fillStyle = '#ffe66d';
+                ctx.beginPath();
+                ctx.arc(x, H-55, 5, 0, Math.PI*2);
+                ctx.fill();
+                
+                // Petals
+                ctx.fillStyle = '#ff99aa';
+                ctx.beginPath();
+                ctx.arc(x-8, H-63, 6, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x+8, H-63, 6, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // Draw MAGIC STAR (goal) - improved with animation
+            const s = star;
+            star.pulse = (star.pulse + 0.05) % (Math.PI * 2);
+            const pulseSize = Math.sin(star.pulse) * 3;
+            
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 20 + pulseSize;
+            
+            // Star shape
+            ctx.fillStyle = '#ffd966';
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                let angle = (i * 72 - 36) * Math.PI / 180;
+                let x1 = s.x + s.width/2 + Math.cos(angle) * (s.width/2 + pulseSize/2);
+                let y1 = s.y + s.height/2 + Math.sin(angle) * (s.height/2 + pulseSize/2);
+                if (i === 0) ctx.moveTo(x1, y1);
+                else ctx.lineTo(x1, y1);
+                
+                angle = ((i + 0.5) * 72 - 36) * Math.PI / 180;
+                let x2 = s.x + s.width/2 + Math.cos(angle) * (s.width/4 + pulseSize/4);
+                let y2 = s.y + s.height/2 + Math.sin(angle) * (s.height/4 + pulseSize/4);
+                ctx.lineTo(x2, y2);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            // Star sparkles
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#ffffaa';
+            ctx.beginPath();
+            ctx.arc(s.x + 10, s.y + 10, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(s.x + 40, s.y + 35, 4, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // Draw FRIENDLY GHOSTS - improved with more details!
+            enemies.forEach(ghost => {
+                // Ghost body with gradient
+                const gradient = ctx.createRadialGradient(
+                    ghost.x + ghost.width/3, ghost.y + ghost.height/3, 5,
+                    ghost.x + ghost.width/2, ghost.y + ghost.height/2, ghost.width
+                );
+                gradient.addColorStop(0, ghost.color);
+                gradient.addColorStop(1, '#e6e6fa');
+                
+                ctx.fillStyle = gradient;
+                ctx.shadowColor = '#ffaaaa';
+                ctx.shadowBlur = 15;
+                
+                // Main body
+                ctx.beginPath();
+                ctx.ellipse(ghost.x + ghost.width/2, ghost.y + ghost.height/2 - 2, ghost.width/2, ghost.height/2, 0, 0, Math.PI*2);
+                ctx.fill();
+                
+                // Wavy bottom
+                ctx.fillStyle = gradient;
+                for (let i = -1; i <= 1; i++) {
+                    ctx.beginPath();
+                    ctx.ellipse(ghost.x + ghost.width/2 + i * 12, ghost.y + ghost.height - 5, 10, 8, 0, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                
+                // Eyes
+                ctx.shadowBlur = 0;
+                
+                // Eye whites
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(ghost.x + ghost.width/2 - 10, ghost.y + ghost.height/2 - 8, 7, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(ghost.x + ghost.width/2 + 10, ghost.y + ghost.height/2 - 8, 7, 0, Math.PI*2);
+                ctx.fill();
+                
+                // Pupils
+                ctx.fillStyle = '#000000';
+                if (ghost.type === 'wink') {
+                    // Wink - one eye closed
+                    ctx.beginPath();
+                    ctx.arc(ghost.x + ghost.width/2 - 10, ghost.y + ghost.height/2 - 8, 4, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(ghost.x + ghost.width/2 + 10, ghost.y + ghost.height/2 - 5, 6, 3, 0, 0, Math.PI*2);
+                    ctx.fill();
+                } else {
+                    // Normal eyes
+                    ctx.beginPath();
+                    ctx.arc(ghost.x + ghost.width/2 - 10, ghost.y + ghost.height/2 - 8, 4, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(ghost.x + ghost.width/2 + 10, ghost.y + ghost.height/2 - 8, 4, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                
+                // Eye sparkles
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(ghost.x + ghost.width/2 - 12, ghost.y + ghost.height/2 - 10, 2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(ghost.x + ghost.width/2 + 8, ghost.y + ghost.height/2 - 10, 2, 0, Math.PI*2);
+                ctx.fill();
+                
+                // Blush
+                ctx.fillStyle = ghost.blush || '#ffc0cb';
+                ctx.globalAlpha = 0.5;
+                ctx.beginPath();
+                ctx.arc(ghost.x + ghost.width/2 - 18, ghost.y + ghost.height/2 + 2, 6, 0, Math.PI*2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(ghost.x + ghost.width/2 + 18, ghost.y + ghost.height/2 + 2, 6, 0, Math.PI*2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                
+                // Mouth
+                ctx.beginPath();
+                ctx.strokeStyle = '#ff6699';
+                ctx.lineWidth = 3;
+                
+                if (ghost.type === 'happy') {
+                    ctx.arc(ghost.x + ghost.width/2, ghost.y + ghost.height/2 + 5, 8, 0.1, Math.PI - 0.1);
+                } else if (ghost.type === 'love') {
+                    ctx.arc(ghost.x + ghost.width/2, ghost.y + ghost.height/2 + 8, 6, 0, Math.PI);
+                } else if (ghost.type === 'cool') {
+                    ctx.arc(ghost.x + ghost.width/2, ghost.y + ghost.height/2 + 5, 6, 0, Math.PI);
+                } else if (ghost.type === 'sleepy') {
+                    ctx.arc(ghost.x + ghost.width/2, ghost.y + ghost.height/2 + 10, 4, 0, Math.PI);
+                } else {
+                    ctx.arc(ghost.x + ghost.width/2, ghost.y + ghost.height/2 + 5, 8, 0.1, Math.PI - 0.1);
+                }
+                ctx.stroke();
+                
+                // Ghost hat or accessory based on type
+                if (ghost.type === 'cool') {
+                    // Sunglasses on head
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(ghost.x + ghost.width/2 - 15, ghost.y - 5, 30, 8);
+                } else if (ghost.type === 'love') {
+                    // Heart
+                    ctx.fillStyle = '#ff3366';
+                    ctx.font = '20px Arial';
+                    ctx.fillText('❤️', ghost.x + ghost.width/2 - 10, ghost.y - 5);
+                }
+            });
+
+            // Draw PLAYER - improved character
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffaa66';
+            
+            // Body with gradient
+            const bodyGradient = ctx.createLinearGradient(player.x, player.y, player.x + player.width, player.y + player.height);
+            bodyGradient.addColorStop(0, '#ffaa44');
+            bodyGradient.addColorStop(1, '#ff8844');
+            ctx.fillStyle = bodyGradient;
+            ctx.beginPath();
+            ctx.roundRect(player.x, player.y, player.width, player.height-8, 12);
+            ctx.fill();
+            
+            // Shirt detail
+            ctx.fillStyle = '#ffaa66';
+            ctx.beginPath();
+            ctx.roundRect(player.x + 5, player.y + 10, 8, 15, 4);
+            ctx.fill();
+            
+            // Head with gradient
+            const headGradient = ctx.createRadialGradient(
+                player.x + player.width/2 - 3, player.y - 8, 5,
+                player.x + player.width/2, player.y - 5, 18
+            );
+            headGradient.addColorStop(0, '#ffdd99');
+            headGradient.addColorStop(1, '#eebb77');
+            ctx.fillStyle = headGradient;
+            ctx.beginPath();
+            ctx.arc(player.x + player.width/2, player.y - 5, 16, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Hair
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.arc(player.x + player.width/2 - 4, player.y - 16, 7, 0, Math.PI*2);
+            ctx.arc(player.x + player.width/2 + 6, player.y - 16, 7, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Hair flick
+            ctx.beginPath();
+            ctx.moveTo(player.x + player.width/2 - 2, player.y - 22);
+            ctx.lineTo(player.x + player.width/2 - 8, player.y - 28);
+            ctx.lineTo(player.x + player.width/2, player.y - 24);
+            ctx.fill();
+            
+            // Eyes
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(player.x + player.width/2 - 7, player.y - 9, 3.5, 0, Math.PI*2);
+            ctx.arc(player.x + player.width/2 + 7, player.y - 9, 3.5, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Eye sparkles
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(player.x + player.width/2 - 8, player.y - 11, 1.5, 0, Math.PI*2);
+            ctx.arc(player.x + player.width/2 + 6, player.y - 11, 1.5, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Blush
+            ctx.fillStyle = '#ffaa88';
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            ctx.arc(player.x + player.width/2 - 12, player.y - 3, 5, 0, Math.PI*2);
+            ctx.arc(player.x + player.width/2 + 12, player.y - 3, 5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            
+            // Smile
+            ctx.beginPath();
+            ctx.strokeStyle = '#ff4466';
+            ctx.lineWidth = 3;
+            ctx.arc(player.x + player.width/2, player.y - 2, 7, 0.1, Math.PI - 0.1);
+            ctx.stroke();
+            
+            // Arms with movement
+            ctx.strokeStyle = '#ff9933';
+            ctx.lineWidth = 7;
+            ctx.lineCap = 'round';
+            
+            if (player.isMoving) {
+                // Running arms
+                ctx.beginPath();
+                ctx.moveTo(player.x + 8, player.y + 15);
+                ctx.lineTo(player.x - 10, player.y + 25);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(player.x + player.width - 8, player.y + 15);
+                ctx.lineTo(player.x + player.width + 10, player.y + 25);
+                ctx.stroke();
+                
+                // Legs running
+                ctx.beginPath();
+                ctx.moveTo(player.x + 8, player.y + player.height - 8);
+                ctx.lineTo(player.x - 5, player.y + player.height + 10);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(player.x + player.width - 8, player.y + player.height - 8);
+                ctx.lineTo(player.x + player.width + 5, player.y + player.height + 10);
+                ctx.stroke();
+            } else {
+                // Standing arms
+                ctx.beginPath();
+                ctx.moveTo(player.x + 8, player.y + 15);
+                ctx.lineTo(player.x - 5, player.y + 20);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(player.x + player.width - 8, player.y + 15);
+                ctx.lineTo(player.x + player.width + 5, player.y + 20);
+                ctx.stroke();
+                
+                // Legs standing
+                ctx.beginPath();
+                ctx.moveTo(player.x + 8, player.y + player.height - 8);
+                ctx.lineTo(player.x + 2, player.y + player.height + 8);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(player.x + player.width - 8, player.y + player.height - 8);
+                ctx.lineTo(player.x + player.width - 2, player.y + player.height + 8);
+                ctx.stroke();
+            }
+            
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            
+            // Draw player name or level indicator
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#5a3e2b';
+            ctx.fillText('⭐ ' + level, player.x - 5, player.y - 25);
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            // Move player
+            if (player.isMoving) {
+                player.x = Math.min(player.x + player.speed, W - player.width);
+            }
+
+            // Check star collision (win!)
+            if (collides(player, star)) {
+                gameActive = false;
+                spinCompleted = false;
+                wheelButtons.style.display = 'block';
+                restartButtons.style.display = 'none';
+                prizeDisplay.textContent = '✨ spin to win ✨';
+                winWheelModal.style.display = 'flex';
+                return;
+            }
+
+            // Move ghosts
+            enemies.forEach(ghost => {
+                ghost.y += ghost.speedY;
+                
+                // Bounce with smooth edges
+                if (ghost.y <= 10) {
+                    ghost.y = 10;
+                    ghost.speedY *= -1;
+                } else if (ghost.y >= H - ghost.height - 20) {
+                    ghost.y = H - ghost.height - 20;
+                    ghost.speedY *= -1;
+                }
+                
+                // Player collision
+                if (collides(player, ghost)) {
+                    if (life <= 1) {
+                        gameActive = false;
+                        gameOverModal.style.display = 'flex';
+                    } else {
+                        life--;
+                        player.x = 30;
+                        player.isMoving = false;
+                        // Shake effect on collision
+                        ghost.x += 5;
+                        setTimeout(() => ghost.x -= 5, 100);
+                    }
+                }
+            });
+
+            updateUI();
+        }
+
+        // Wheel spin function
+        function spinWheel() {
+            if (spinning || spinCompleted) return;
+            spinning = true;
+            
+            spinButton.disabled = true;
+            
+            // Random spin
+            const spins = 5 + Math.floor(Math.random() * 5);
+            const degrees = spins * 360 + Math.floor(Math.random() * 360);
+            
+            wheel.style.transform = `rotate(${degrees}deg)`;
+            
+            // Calculate prize
+            setTimeout(() => {
+                const prizeIndex = Math.floor((degrees % 360) / 60);
+                const prize = prizes[prizeIndex];
+                prizeDisplay.textContent = `🎁 ${prize}!`;
+                
+                // Apply prize
+                switch(prize) {
+                    case '🌟 EXTRA LIFE':
+                        life++;
+                        break;
+                    case '⚡ SPEED BOOST':
+                        player.speed += 0.5;
+                        break;
+                    case '❤️ +2 HEARTS':
+                        life += 2;
+                        break;
+                    case '🎮 BONUS LEVEL':
+                        level++;
+                        break;
+                    case '⭐ DOUBLE SCORE':
+                        score += 10;
+                        break;
+                    case '🛡️ SHIELD':
+                        life++; // Simple shield = extra life
+                        break;
+                }
+                
+                updateUI();
+                spinning = false;
+                spinCompleted = true;
+                
+                // Hide spin button, show restart/continue buttons
+                wheelButtons.style.display = 'none';
+                restartButtons.style.display = 'block';
+            }, 3000);
+        }
+
+        function continueGame() {
+            winWheelModal.style.display = 'none';
+            
+            // Level up
+            level++;
+            player.speed += 0.3;
+            player.x = 30;
+            
+            // Speed up ghosts a little
+            enemies.forEach(g => {
+                g.speedY > 0 ? g.speedY += 0.3 : g.speedY -= 0.3;
+            });
+            
+            gameActive = true;
+        }
+
+        // Restart game
+        window.restartGame = function() {
+            gameActive = true;
+            level = 1;
+            life = 5;
+            score = 0;
+            player.speed = 2.5;
+            player.x = 30;
+            
+            enemies = [
+                { type: 'happy', x: 120, y: 50, speedY: 1.5, width: 45, height: 50, face: '😊', color: '#ffffff', blush: '#ffc0cb' },
+                { type: 'wink', x: 220, y: 200, speedY: 2, width: 47, height: 47, face: '😉', color: '#f0f0ff', blush: '#ffb6c1' },
+                { type: 'love', x: 340, y: 100, speedY: 2.2, width: 43, height: 53, face: '😍', color: '#fff5f5', blush: '#ff9eb5' },
+                { type: 'cool', x: 460, y: 280, speedY: -1.8, width: 45, height: 45, face: '😎', color: '#f5f5ff', blush: '#ffa5b0' },
+                { type: 'sleepy', x: 540, y: 30, speedY: 1.6, width: 41, height: 51, face: '😴', color: '#e6e6ff', blush: '#ffb3ba' }
+            ];
+            
+            gameOverModal.style.display = 'none';
+            winWheelModal.style.display = 'none';
+            updateUI();
+        };
+
+        // Game loop
+        function gameLoop() {
+            if (gameActive) {
+                update();
+                draw();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners
+        canvas.addEventListener('mousedown', () => { if (gameActive) player.isMoving = true; });
+        canvas.addEventListener('mouseup', () => player.isMoving = false);
+        canvas.addEventListener('mouseleave', () => player.isMoving = false);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameActive) player.isMoving = true;
+        });
+        canvas.addEventListener('touchend', () => player.isMoving = false);
+        canvas.addEventListener('touchcancel', () => player.isMoving = false);
+
+        // Start
+        updateUI();
+        gameLoop();
+
+        // Helper
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
+            this.closePath();
+            return this;
+        };
+    </script>
+</body>
+</html>
